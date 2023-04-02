@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PieceSequences.h">
+    <ClInclude Include="SequenceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CodeGraveyard.h">
