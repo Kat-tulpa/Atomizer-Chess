@@ -147,8 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChessSequence.h" />
-    <ClInclude Include="CodeGraveyard.h" />
-    <ClInclude Include="Piece.h" />
+    <ClInclude Include="ProjectInSingleFile.h" />
     <ClInclude Include="SequenceManager.h" />
     <ClInclude Include="ThreadCount.h" />
   </ItemGroup>

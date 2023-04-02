@@ -23,16 +23,13 @@
     <ClInclude Include="SequenceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CodeGraveyard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Piece.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ChessSequence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ThreadCount.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectInSingleFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
