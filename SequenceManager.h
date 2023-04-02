@@ -1,5 +1,7 @@
 #include <random>
 #include <string_view>
+#include <unordered_map>
+#include <tuple>
 
 namespace SequenceManager {
     constexpr char notation[] =
@@ -8,7 +10,7 @@ namespace SequenceManager {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     constexpr size_t differentTypes = sizeof(notation) - 1;
 
-    static std::vector<std::tuple<std::string, unsigned int, int>> sequence_occurances_score;
+    static std::unordered_map<std::string, std::tuple<unsigned int, int>> sequence_occurances_score;
 
     template <typename CharType = char, const char* Notation = notation>
     std::basic_string<CharType> makeRandom(size_t length) {
@@ -23,12 +25,12 @@ namespace SequenceManager {
     }
 
     static void add(const std::string& sequence) {
-        for (auto& entry : sequence_occurances_score) {
-            if (std::get<0>(entry) == sequence) {
-                std::get<1>(entry)++;
-                return;
-            }
+        auto it = sequence_occurances_score.find(sequence);
+        if (it != sequence_occurances_score.end()) {
+            std::get<0>(it->second)++;
         }
-        sequence_occurances_score.emplace_back(sequence, 1, 0);
+        else {
+            sequence_occurances_score.emplace(sequence, std::make_tuple(1, 0));
+        }
     }
 }

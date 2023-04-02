@@ -9,12 +9,13 @@ void addRandomSequences(const unsigned int count, const size_t length) {
 }
 
 void printSequences() {
-	for (auto& entry : SequenceManager::sequence_occurances_score)
-		std::cout << std::get<0>(entry) << " : " << std::get<1>(entry) << std::endl;
+	for (const auto& entry : SequenceManager::sequence_occurances_score) {
+		std::cout << entry.first << " : " << std::get<0>(entry.second) << std::endl;
+	}
 }
 
 int main() {
-	addRandomSequences(100000, RAND_PIECESEQUENCE_LENGTH);
-	//printSequences();
+	addRandomSequences(1000000, RAND_PIECESEQUENCE_LENGTH);
+	printSequences();
 	return 0;
 }
