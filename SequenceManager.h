@@ -12,7 +12,8 @@ namespace SequenceManager {
 
     template <typename CharType = char>
     std::basic_string<CharType> makeRandom(size_t length) {
-        std::mt19937 rng(std::random_device{}());
+        std::random_device rd;
+        std::mt19937 rng(rd());
         std::uniform_int_distribution<size_t> dist(0, differentTypes - 1);
 
         std::basic_string<CharType> sequence(length, 0);
