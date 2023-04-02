@@ -2,6 +2,9 @@
 #include <string_view>
 #include <unordered_map>
 #include <tuple>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 namespace SequenceManager {
     constexpr char notation[] =
@@ -10,7 +13,9 @@ namespace SequenceManager {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     constexpr size_t differentTypes = sizeof(notation) - 1;
 
+    // Using a thread-safe container and a mutex to protect access to it
     static std::unordered_map<std::string, std::tuple<unsigned int, int>> sequence_occurances_score;
+    static std::mutex map_mutex;
 
     template <typename CharType = char, const char* Notation = notation>
     std::basic_string<CharType> makeRandom(size_t length) {
@@ -25,6 +30,7 @@ namespace SequenceManager {
     }
 
     static void add(const std::string& sequence) {
+        std::lock_guard<std::mutex> guard(map_mutex);
         auto it = sequence_occurances_score.find(sequence);
         if (it != sequence_occurances_score.end()) {
             std::get<0>(it->second)++;
