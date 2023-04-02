@@ -20,7 +20,7 @@ namespace SequenceManager {
     // Create an unordered map with string keys and occurance_score values
     std::unordered_map<std::string, occurance_score> sequence_map;
 
-    // Function to generate a random string of a given length
+    // Function to generate a random string of a given length, mostly for testing purposes
     template <typename CharType>
     std::basic_string<CharType> makeRandomSequence(size_t length, const CharType* characters, size_t numCharacters) {
         static std::minstd_rand rng(std::random_device{}());
