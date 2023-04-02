@@ -1,7 +1,7 @@
 #include <iostream>
 #include "SequenceManager.h"
 
-static constexpr size_t RAND_PIECESEQUENCE_LENGTH = 3;
+static constexpr size_t RAND_PIECESEQUENCE_LENGTH = 9;
 
 void addRandomSequences(const unsigned int count, const size_t length) {
 	for (unsigned int i = 0; i < count; i++)
@@ -14,7 +14,7 @@ void printSequences() {
 }
 
 int main() {
-	addRandomSequences(50000, 3);
-	printSequences();
+	addRandomSequences(100000, RAND_PIECESEQUENCE_LENGTH);
+	//printSequences();
 	return 0;
 }
