@@ -1,5 +1,5 @@
 #include <random>
-#include <string>
+#include <string_view>
 
 namespace SequenceManager {
     constexpr char notation[] =
@@ -10,15 +10,14 @@ namespace SequenceManager {
 
     static std::vector<std::tuple<std::string, unsigned int, int>> sequence_occurances_score;
 
-    template <typename CharType = char>
+    template <typename CharType = char, const char* Notation = notation>
     std::basic_string<CharType> makeRandom(size_t length) {
-        std::random_device rd;
-        std::mt19937 rng(rd());
-        std::uniform_int_distribution<size_t> dist(0, differentTypes - 1);
+        static std::minstd_rand rng(std::random_device{}());
+        static std::uniform_int_distribution<size_t> dist(0, differentTypes - 1);
 
         std::basic_string<CharType> sequence(length, 0);
-        for (auto& c : sequence) {
-            c = static_cast<CharType>(notation[dist(rng)]);
+        for (size_t i = 0; i < length; i++) {
+            sequence[i] = static_cast<CharType>(Notation[dist(rng)]);
         }
         return sequence;
     }
