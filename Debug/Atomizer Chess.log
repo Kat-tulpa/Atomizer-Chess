@@ -1,3 +1,3 @@
 ﻿  main.cpp
-C:\Users\Kat-Tulpa\source\repos\Atomizer Chess\Atomizer Chess\PieceSequences.h(21,19): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\Kat-Tulpa\source\repos\Atomizer Chess\Atomizer Chess\Chess.h(34,31): warning C4018: '<': signed/unsigned mismatch
   Atomizer Chess.vcxproj -> C:\Users\Kat-Tulpa\source\repos\Atomizer Chess\Debug\Atomizer Chess.exe

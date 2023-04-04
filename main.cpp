@@ -1,16 +1,8 @@
 #include <iostream>
-#include "ChessSequence.h"
-
-static constexpr size_t RAND_PIECESEQUENCE_LENGTH = 64;
-
-void printSequences() {
-    for (const auto& entry : SequenceManager::sequence_map) {
-        std::cout << entry.first << " : " << std::get<0>(entry.second) << std::endl;
-    }
-}
+#include "Chess.h"
 
 int main() {
-    ChessSequenceManager::addRandom(1000000, RAND_PIECESEQUENCE_LENGTH);
-    printSequences();
+    Chess::load_FEN_CSV("chessData.csv");
+    SequenceManager::print();
     return 0;
 }

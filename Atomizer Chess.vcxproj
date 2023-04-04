@@ -146,8 +146,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ChessSequence.h" />
-    <ClInclude Include="ProjectInSingleFile.h" />
+    <ClInclude Include="Chess.h" />
+    <ClInclude Include="RandomDevice.h" />
     <ClInclude Include="SequenceManager.h" />
     <ClInclude Include="ThreadCount.h" />
   </ItemGroup>
