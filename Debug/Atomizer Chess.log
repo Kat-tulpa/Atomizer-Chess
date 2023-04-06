@@ -1,3 +1,4 @@
 ﻿  main.cpp
-C:\Users\Kat-Tulpa\source\repos\Atomizer Chess\Atomizer Chess\Chess.h(34,31): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Kat-Tulpa\source\repos\Atomizer Chess\Atomizer Chess\SequenceManager.h(51,40): warning C4267: 'return': conversion from 'size_t' to 'uint8_t', possible loss of data
+C:\Users\Kat-Tulpa\source\repos\Atomizer Chess\Atomizer Chess\Chess.h(172,54): warning C4267: 'argument': conversion from 'size_t' to 'const uint8_t', possible loss of data
   Atomizer Chess.vcxproj -> C:\Users\Kat-Tulpa\source\repos\Atomizer Chess\Debug\Atomizer Chess.exe
