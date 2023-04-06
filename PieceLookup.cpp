@@ -13,11 +13,11 @@ constexpr std::array<PIECETYPE, 256> initPieceLookup()
     pieceLookup[static_cast<uint8_t>('Q')] = PIECETYPE::WHITE_QUEEN;
     pieceLookup[static_cast<uint8_t>('K')] = PIECETYPE::WHITE_KING;
     pieceLookup[static_cast<uint8_t>('p')] = PIECETYPE::BLACK_PAWN;
-    pieceLookup[static_cast<uint8_t>('n')] = PIECETYPE::BLACK_PAWN;
-    pieceLookup[static_cast<uint8_t>('b')] = PIECETYPE::BLACK_PAWN;
-    pieceLookup[static_cast<uint8_t>('r')] = PIECETYPE::BLACK_PAWN;
-    pieceLookup[static_cast<uint8_t>('q')] = PIECETYPE::BLACK_PAWN;
-    pieceLookup[static_cast<uint8_t>('k')] = PIECETYPE::BLACK_PAWN;
+    pieceLookup[static_cast<uint8_t>('n')] = PIECETYPE::BLACK_KNIGHT;
+    pieceLookup[static_cast<uint8_t>('b')] = PIECETYPE::BLACK_BISHOP;
+    pieceLookup[static_cast<uint8_t>('r')] = PIECETYPE::BLACK_ROOK;
+    pieceLookup[static_cast<uint8_t>('q')] = PIECETYPE::BLACK_QUEEN;
+    pieceLookup[static_cast<uint8_t>('k')] = PIECETYPE::BLACK_KING;
     return pieceLookup;
 }
 
