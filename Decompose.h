@@ -1,21 +1,9 @@
 #pragma once
+#include 
 
 namespace Decompose {
 
-    enum Shape {
-        TRIANGLE,
-        QUADRILATERAL,
-        ELLIPSE,
-    };
-
-    static void board() {
-        constexpr unsigned int sideLength = 8;
-        grid(sideLength);
-    }
-
-    static void grid(const int sideLength) {
-        std::vector<std::string> sequences;
-
+    static void grid(const std::string) {
     }
 
     static void allSubquadrilaterals(std::vector<std::string> sequenceList, const std::string& sequence, const unsigned int sideLength) {

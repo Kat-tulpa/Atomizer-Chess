@@ -1,39 +1,58 @@
 #pragma once
 
 #include <unordered_map>
-#include "SerializedData.h"
+#include <iostream>
 
-namespace SequenceManager {
-
-    // Define a type alias for the pair of unsigned int and int
-    using data_occurances = std::pair<SerializedData, uint8_t>;
+class SequenceManager {
+private:
 
     // First few bits of std::string = readable length of string in bits, anything after is raw bit data
-    std::vector<std::unordered_map<std::string, SerializedData>> sequence_maps;
+    static std::vector<std::unordered_map<std::string, std::string>> sequence_maps;
 
-    void print() {
-        for (uint8_t i = 0; i < sequence_maps.size(); i++) {
-            std::cout << "Data type " << static_cast<int>(i) << ":\n";
-            for (auto it = sequence_maps[i].begin(); it != sequence_maps[i].end(); ++it) {
-                it->second.print();
-                std::cout << std::endl;
+public:
+
+    static void print() {
+        // Iterate over each map in the vector
+        for (const auto& map : sequence_maps) {
+            // Print the opening bracket for the map
+            std::cout << "{\n";
+
+            // Iterate over each key-value pair in the map
+            for (const auto& pair : map) {
+                // Print the key and value as a string, with quotes around them
+                std::cout << "    \"" << pair.first << "\": \"" << pair.second << "\",\n";
             }
+
+            // Print the closing bracket for the map
+            std::cout << "}\n";
         }
     }
 
     // Adds a new hashmap for a new type of data, returning the new index of the hashmap that's being added
-    uint8_t makeAddDataType() {
-        std::unordered_map<std::string, SerializedData> typeToAdd;
+    static const uint8_t makeAddDataType() {
+        std::unordered_map<std::string, std::string> typeToAdd;
         sequence_maps.push_back(typeToAdd);
         return sequence_maps.size() - 1;
     }
 
     // Function to add a sequence to the map
-    void addDataEntry(uint8_t dataType, const SerializedData& data) {
+    static void addDataEntry(uint8_t dataType, const std::string& data) {
         auto& map = sequence_maps[dataType];
-        const std::string& serialKey = data.serialize();
-        auto it = map.find(serialKey);
+        auto it = map.find(data);
         if (it == map.end())
-            map.emplace(serialKey, data);
+            map.emplace(data, data);
+        //print();
+    }
+
+    // Function to add a sequence to the map
+    static void addDataEntries(uint8_t dataType, const std::vector<std::string>& datas) {
+        auto& map = sequence_maps[dataType];
+        for (const auto& data : datas) {
+            auto it = map.find(data);
+            if (it == map.end())
+                map.emplace(data, data);
+        }
     }
 };
+
+std::vector<std::unordered_map<std::string, std::string>> SequenceManager::sequence_maps; // Implementation needs to be defined outside of class declarr
