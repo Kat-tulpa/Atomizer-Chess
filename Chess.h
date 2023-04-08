@@ -202,13 +202,13 @@ namespace Chess {
             std::string line;
             line.reserve(MAX_LINE_LENGTH);
             while (std::getline(file, line)) {
-                const auto pos = line.find(',');
-                if (pos == std::string::npos) {
-                    continue; // invalid line format, skip it
-                }
-                const std::string& fenString = FEN::parseFen(line.substr(0, pos));
-                const std::string& parsedFen = FEN::packBoard(fenString);
-                SequenceManager::addDataEntry(PackedBoard::sequenceManagerTypeID, parsedFen);
+                std::string_view view(line);
+                std::string_view fen(view.substr(0, view.find(',')));
+                std::string_view evalscore(view.substr(view.find(',') + 1));
+                const std::string fenString = std::string(fen);
+                const std::string parsedFen = FEN::parseFen(fenString);
+                const std::string packedBoard = FEN::packBoard(parsedFen);
+                SequenceManager::addDataEntry(PackedBoard::sequenceManagerTypeID, packedBoard);
             }
 
             file.close();
