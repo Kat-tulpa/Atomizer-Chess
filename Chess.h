@@ -149,29 +149,56 @@ namespace Chess {
         return packedBoard;
     }
 
+    static std::vector<PieceLookup::PIECETYPE> unpackBoard(const std::string& packedBoard, const uint8_t width) {
+        const uint8_t height = packedBoard.length() / static_cast<uint16_t>(width);
+        std::vector<PieceLookup::PIECETYPE> unpackedBoard;
+        unpackedBoard.reserve(static_cast<uint16_t>(width) * static_cast<uint16_t>(height));
+
+        for (int i = 0; i < packedBoard.length(); i++) {
+            char byte = packedBoard[i];
+
+            for (int j = 0; j < 8; j += 4) {
+                int index = i * 4 + j / 2;
+                PieceLookup::PIECETYPE piece1 = static_cast<PieceLookup::PIECETYPE>((byte >> (6 - j)) & 0x03);
+                PieceLookup::PIECETYPE piece2 = static_cast<PieceLookup::PIECETYPE>((byte >> (4 - j)) & 0x03);
+
+                if (index < width * height) {
+                    unpackedBoard.push_back(piece1);
+                    if (index % width < width - 1) {
+                        unpackedBoard.push_back(piece2);
+                    }
+                }
+            }
+        }
+
+        // Add any missing empty squares at the end of the board
+        int emptySquares = width * height - unpackedBoard.size();
+        if (emptySquares > 0) {
+            unpackedBoard.insert(unpackedBoard.end(), emptySquares, PieceLookup::PIECETYPE::EMPTY);
+        }
+
+        return unpackedBoard;
+    }
+
     class CSV {
     public:
         // Parses a signed integer from a string that includes "+, -, and #" chess notation to indicate engine evaluation score
-        static int16_t scoreStringToInt(const std::string& str) {
-            int sign = 0;
-            if (str[0] == '+')
-                sign = 1;
-            else if (str[0] == '-')
-                sign = -1;
+        int parseEvalScore(const std::string& evalscore) {
+            if (evalscore[0] == '#') { // Checkmate in X moves
 
-            int16_t result = 0;
-            size_t i = sign != 0 ? 1 : 0;
-
-            for (; i < str.size(); ++i) {
-                if (str[i] == '#') {
-                    result = 32000;
-                    break;
+                if (evalscore[1] == '+') {
+                    return 9999 - std::stoi(evalscore.substr(2));
                 }
-                result = result * 10 + (str[i] - '0');
+                else if (evalscore[1] == '-') {
+                    return -9999 + std::stoi(evalscore.substr(2));
+                }
+                else {
+                    throw std::invalid_argument("Invalid evalscore format");
+                }
             }
-
-            if (sign == -1) result = -result;
-            return result;
+            else {
+                return std::stoi(evalscore); // Regular Score
+            }
         }
 
         // Parses a CSV line and returns a vector of strings
