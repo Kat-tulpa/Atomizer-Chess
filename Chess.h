@@ -50,6 +50,7 @@ About Chess.h
 #include <fstream>
 #include <sstream>
 #include "SequenceManager.h"
+#include "Decompose.h"
 
 namespace Chess {
     class PieceLookup {
@@ -107,6 +108,34 @@ namespace Chess {
     public:
         static std::string parseFen(const std::string& fen);
         static std::string packBoard(const std::string& board);
+
+        static std::string boardFromFEN(const std::string& fen) {
+            std::string board;
+            board.reserve(64);
+
+            std::istringstream iss(fen);
+            std::string fenBoard;
+            iss >> fenBoard; // Skip the first token (piece placement)
+
+            for (int i = 0; i < 8; ++i) {
+                iss >> fenBoard; // Get the next rank
+                for (char c : fenBoard) {
+                    if (std::isdigit(c)) {
+                        // Add empty squares
+                        int count = c - '0';
+                        for (int j = 0; j < count; ++j) {
+                            board.push_back('.');
+                        }
+                    }
+                    else {
+                        // Add the piece
+                        board.push_back(c);
+                    }
+                }
+            }
+
+            return board;
+        }
     };
 
     std::string FEN::parseFen(const std::string& fen) {
@@ -216,6 +245,7 @@ namespace Chess {
         }
 
         static void loadCsvFile(const std::string& filename) {
+            Decompose::init();
             PieceLookup::init();
             PackedBoard::init();
 
@@ -231,11 +261,9 @@ namespace Chess {
             while (std::getline(file, line)) {
                 std::string_view view(line);
                 std::string_view fen(view.substr(0, view.find(',')));
-                std::string_view evalscore(view.substr(view.find(',') + 1));
-                const std::string fenString = std::string(fen);
-                const std::string parsedFen = FEN::parseFen(fenString);
-                const std::string packedBoard = FEN::packBoard(parsedFen);
-                SequenceManager::addDataEntry(PackedBoard::sequenceManagerTypeID, packedBoard);
+                std::string_view evalscoreString(view.substr(view.find(',') + 1));
+                const std::string boardString = FEN::boardFromFEN(std::string(fen));
+                Decompose::Grid(boardString);
             }
 
             file.close();
