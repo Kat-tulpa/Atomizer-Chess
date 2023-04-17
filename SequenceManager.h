@@ -72,6 +72,20 @@ public:
             it->second.second++;
         }
     }
+
+    static void addDataEntries(const uint8_t registrationID, std::vector<std::string>& entries) {
+        auto& map = sequence_maps[registrationID];
+        for (auto& entry : entries) {
+            auto it = map.find(entry);
+            if (it == map.end()) {
+                data_occurrence pair = std::make_pair(entry, 1);
+                map.emplace(entry, pair);
+            }
+            else {
+                it->second.second++;
+            }
+        }
+    }
 };
 
 std::vector<std::unordered_map<std::string, std::pair<std::string, uint8_t>>> SequenceManager::sequence_maps; // Implementation needs to be defined outside of class declaration
