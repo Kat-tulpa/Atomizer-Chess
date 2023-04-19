@@ -86,6 +86,15 @@ public:
             }
         }
     }
+
+    static std::vector<data_occurrence>& getAll(const uint8_t registration_ID) {
+        std::vector<data_occurrence> entries;
+        auto& map = sequence_maps[registration_ID];
+        for (const auto& pair : map) {
+            entries.push_back(pair.second);
+        }
+        return entries;
+    }
 };
 
 std::vector<std::unordered_map<std::string, std::pair<std::string, uint8_t>>> SequenceManager::sequence_maps; // Implementation needs to be defined outside of class declaration
