@@ -1,14 +1,3 @@
-/*
-About Chess.h
-    Intention is to provide various utility functions and data structures related to chess, such as
-    - Parsing FEN std::strings
-    - Representing chess pieces
-    - Loading FEN std::strings and evaluations from a CSV file into a SequenceManager
- */
-
- /*
-     Here is a summary of the main components of the code:
- */
 
 #include <cstdint>
 #include <algorithm>
@@ -17,19 +6,48 @@ About Chess.h
 
 namespace Chess {
 
-    class EvaluationModel {
-        static GeometricDecomposition::ShapeList& parent_board_shapes;
+    class OriginalBoard {
+    public:
+        static constexpr size_t number_of_decomposable_shapes[GeometricDecomposition::Shape::Type::TYPE_COUNT] = { 0, 1962 };
         
-        std::vector<std::pair<const Shape, float>> m_subshape_score;
-        float m_mutation_rate;
-        float m_highest_accuracy;
+    private:
+        OriginalBoard(const std::vector<char> data) {
+            GeometricDecomposition::Shape shape{
+                GeometricDecomposition::Shape::Type::RECTANGLE,
+                GeometricDecomposition::Shape::Dimensions{ 8, 8 },
+                GeometricDecomposition::Shape::Offset{ 0, 0 },
+                data
+            };
 
-        // Creates while initalizing all weights to 0
-        EvaluationModel() {
-            for (unsigned int i = 0; i < parent_board_shapes.size(); i++)
-                m_subshape_score.push_back(std::make_pair(shape_list[i], 0.f));
+            subshapes.reserve(number_of_decomposable_shapes[type]);
+            subshapes = GeometricDecomposition::all(shape);
         }
 
+        GeometricDecomposition::Shape::Type type;
+        GeometricDecomposition::ShapeList subshapes;
+        std::vector<char> data;
+        float known_evaluation_score;
+    };
+
+    class EvaluationModel {
+    public:
+        static std::vector<OriginalBoard> original_boards;
+        static std::vector<std::vector<float>> subshape_scores;
+        static float highest_accuracy;
+         
+        static void initOriginalBoards() {
+
+        }
+
+        void init() {
+            for (unsigned int i = 0; i < original_boards.size(); i++)
+                m_subshape_scores.push_back(0.f);
+            m_mutation_rate = 0.f;
+            m_accuracy = 0.f;
+        }
+
+        EvaluationModel(const float mutation_rate, const float mutation_magnitude)
+            : m_mutation_rate(mutation_rate), m_mutation_magnitude(mutation_magnitude) {}
 
 
         static const ShapeList& fromSequenceManagerData(std::vector<std::pair<std::string, uint8_t>> sequence_manager_datas) {
@@ -77,5 +95,14 @@ namespace Chess {
                         // add score if the eval score for the original 8x8 board was positive
                         // subtract score if the eval score for the original 8x8 board was negative    
         }
+
+    private:
+        float m_mutation_rate;
+        float m_mutation_magnitude;
+        float m_accuracy;
     };
+
+    std::vector<OriginalBoard> original_boards = OriginalBoard::initOriginalBoards();
+    std::vector<std::vector<float>> subshape_scores = OriginalBoard::initSubshapes();
+    float highest_accuracy = 0.f;
 };
