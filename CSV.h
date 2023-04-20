@@ -7,8 +7,7 @@
 class CSV {
 public:
     static constexpr size_t DEFAULT_MAX_LINE_LENGTH = 256;
-    CSV(const std::string& filename) : m_file(filename), m_max_line_length(DEFAULT_MAX_LINE_LENGTH) { }
-    CSV() { }
+    CSV(const std::string& filename) : m_file_name(filename), m_file(filename), m_max_line_length(DEFAULT_MAX_LINE_LENGTH) { }
 
     void setMaxLineLength(const size_t _length) {
         m_max_line_length = _length;
@@ -75,7 +74,21 @@ public:
         m_file.close();
     }
 
+    size_t lineCount() {
+        size_t line_count = 0;
+        std::string line;
+        while (std::getline(m_file, line))
+            ++line_count;
+
+        // Cycle the file
+        m_file.close();
+        m_file.open(m_file_name);
+
+        return line_count;
+    }
+
 private:
+    std::string m_file_name;
     std::ifstream m_file;
     size_t m_max_line_length;
 };
