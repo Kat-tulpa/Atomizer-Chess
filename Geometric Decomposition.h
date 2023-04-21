@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "Shape.h"
 
@@ -23,7 +24,8 @@ public:
                         subrect_data.reserve(w * h);
                         for (int x2 = x1; x2 < x1 + w; ++x2) {
                             for (int y2 = y1; y2 < y1 + h; ++y2) {
-                                subrect_data.emplace_back(parent_data[x2 * parent_height + y2]);
+                                subrect_data.push_back(parent_data[x2 * parent_height + y2]);
+                                //std::cout << parent_data[x2 * parent_height + y2] << std::endl;
                             }
                         }
                         Shape shape(Shape::Type::RECTANGLE, Shape::Dimensions(w, h), Shape::Offset(x1, y1), subrect_data);
@@ -35,7 +37,7 @@ public:
         shape_list.erase(shape_list.begin());
     }
 
-    static ShapeList& all(const Shape& parent_shape) {
+    static ShapeList all(const Shape& parent_shape) {
         ShapeList shape_list;
         quadrilateralsRectangleAll(parent_shape, shape_list);
         return shape_list;
