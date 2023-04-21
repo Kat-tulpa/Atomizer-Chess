@@ -7,6 +7,7 @@
 
 class CSV {
     static constexpr size_t DEFAULT_MAX_LINE_LENGTH = 256;
+    static constexpr size_t CUTOFF_LINE_COUNT = 100;
 
 public:
 
@@ -16,7 +17,7 @@ public:
             throw std::ios_base::failure("File not found: " + m_file_name);
 
         std::string line;
-        while (std::getline(m_file, line))
+        while (std::getline(m_file, line) && (m_line_count < CUTOFF_LINE_COUNT))
             ++m_line_count;
 
         // Cycle the file
@@ -48,16 +49,15 @@ public:
         }
     }
 
-    std::vector<std::string> readLineDelimited(const char* delimiters, size_t numFields) {
+    std::vector<std::string> readLineDelimited(const char* delimiters) {
         std::vector<std::string> fields;
         std::string field;
 
-        while (std::getline(m_file, field)) {
+        if (std::getline(m_file, field)) {
             size_t start = 0;
             size_t end = 0;
-            size_t fieldCount = 0;
 
-            while (fieldCount < numFields - 1) {
+            while (true) {
                 for (size_t i = 0; i < std::strlen(delimiters); i++) {
                     end = field.find_first_of(delimiters[i], start);
                     if (end != std::string::npos) break;
@@ -67,13 +67,10 @@ public:
 
                 fields.push_back(field.substr(start, end - start));
                 start = end + 1;
-                fieldCount++;
             }
 
             // Handle the last field separately to avoid adding an extra delimiter
             fields.push_back(field.substr(start));
-
-            if (fields.size() >= numFields) break;
         }
 
         return fields;
