@@ -34,4 +34,12 @@ public:
             return std::stoi(evalscore); // Regular Score
         }
     }
+
+    static bool isAllThisChar(const std::vector<char>& vec, const char c) {
+        for (char v : vec) {
+            if (v != c)
+                return false;
+        }
+        return true;
+    }
 };

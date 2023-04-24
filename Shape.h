@@ -43,17 +43,13 @@ public:
         : m_type(type), m_dimensions(dimensions), m_offset(offset), m_data(data)
     {}
 
-    Shape& operator=(const Shape& other) {
-        if (this == &other) {
-            return *this;
-        }
-        m_type = other.m_type;
-        m_dimensions.m_width = other.m_dimensions.m_width;
-        m_dimensions.m_height = other.m_dimensions.m_height;
-        m_offset.m_x = other.m_offset.m_x;
-        m_offset.m_y = other.m_offset.m_y;
-        m_data = other.m_data;
-        return *this;
+    bool operator==(const Shape& other) const {
+        return m_type == other.m_type
+            && m_dimensions.m_width == other.m_dimensions.m_width
+            && m_dimensions.m_height == other.m_dimensions.m_height
+            && m_offset.m_x == other.m_offset.m_x
+            && m_offset.m_y == other.m_offset.m_y
+            && m_data == other.m_data;
     }
 
     auto getType() const { return m_type; }
@@ -67,28 +63,24 @@ public:
         return m_dimensions.getCategorizationPrefix() + m_offset.getCategorizationPrefix(); 
     }
 
-    bool containsSubshape(const Shape& subshape) {
-        const size_t limit_x = subshape.getWidth() + subshape.getOffsetX();
-        const size_t limit_y = subshape.getHeight() + subshape.getOffsetY();
-        if (limit_x > getWidth() || limit_y > getHeight()) return false; // Subshape must fit inside shape
+    // function to check if a smaller DataShape is contained within this DataShape
+    bool containsSubshape(const Shape& subshape) const {
+        if (subshape.m_dimensions.m_width > m_dimensions.m_width || subshape.m_dimensions.m_height > m_dimensions.m_height)
+            return false; // subshape is larger, cannot be contained
 
-        const std::vector<char>& shape_data = getData();
-        const std::vector<char>& subshape_data = subshape.getData();
-        size_t position = subshape.getOffsetY() * getWidth() + subshape.getOffsetX();
-        size_t position_y = subshape.getOffsetY();
-        size_t position_x = subshape.getOffsetX();
-
-        for (unsigned int i = 0; i < subshape_data.size(); i++) {
-            if (!subshape_data[i] == shape_data[(position_y * getHeight()) + (subshape.getOffsetX() + position_x)])
-                return false;
-            position_x++;
-            if (position_x % subshape.getWidth() == 0) {
-                position_x = 0;
-                position_y++;
-            }
+        const char* subshapeData = subshape.m_data.data();
+        const char* data = m_data.data();
+        int subshapeWidth = subshape.m_dimensions.m_width;
+        int shapeWidth = m_dimensions.m_width;
+        for (int i = 0; i < subshape.m_data.size(); ++i) {
+            int x = i % subshapeWidth;
+            int y = i / subshapeWidth;
+            const char* subshapePixel = subshapeData + i;
+            const char* pixel = data + (subshape.m_offset.m_y + y) * shapeWidth + (subshape.m_offset.m_x + x);
+            if (*subshapePixel != *pixel)
+                return false; // data does not match, subshape not contained
         }
-
-        return true;
+        return true; // all data matched, subshape is contained
     }
 
     Type m_type;

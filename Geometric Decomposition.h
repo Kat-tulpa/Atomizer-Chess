@@ -28,8 +28,11 @@ public:
                                 //std::cout << parent_data[x2 * parent_height + y2] << std::endl;
                             }
                         }
-                        Shape shape(Shape::Type::RECTANGLE, Shape::Dimensions(w, h), Shape::Offset(x1, y1), subrect_data);
-                        shape_list.emplace_back(std::move(shape));
+
+                        if (!Utility::isAllThisChar(subrect_data, ' ')) {
+                            Shape shape(Shape::Type::RECTANGLE, Shape::Dimensions(w, h), Shape::Offset(x1, y1), subrect_data);
+                            shape_list.emplace_back(std::move(shape));
+                        }
                     }
                 }
             }

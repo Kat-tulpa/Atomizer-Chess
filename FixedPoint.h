@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <string>
+#include <iostream>
 //#include "RockBox/fixedpoint.h"
 
 #define FIXED_POINT_DEFAULT_SCALE 256
