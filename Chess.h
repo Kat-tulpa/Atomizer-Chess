@@ -76,11 +76,31 @@ public:
             return random < probability;
         }
 
+        static const std::vector<float> resolveParentWeights(const std::vector<float>& weights, const OriginalBoard& board) {
+            std::vector<float> resolved_weights;
+            for (auto& subshape_index : board.subshape_indicies)
+                resolved_weights.push_back(weights[subshape_index]);
+            return resolved_weights;
+        }
+
+        static void testModelOnBoard(const std::vector<float>& weights, const OriginalBoard& board) {
+            const std::vector<float>& these_weights = resolveParentWeights(weights, board);
+            float score = 0.f;
+            for (auto& subshape_index : board.subshape_indicies)
+                score += weights[subshape_index];
+            std::cout << "Model's accuracy against this board was: " << calculateAccuracy(score, board.m_known_evaluation_score) * 100 << "%" << std::endl;
+        }
+
+        static void testModelOnHiddenBoards(const std::vector<float>& weights, const size_t hidden_board_count) {
+            for (unsigned int i = 0; i < hidden_board_count; i++)
+                testModelOnBoard(weights, original_boards[original_boards.size() - hidden_board_count + i]);
+        }
+
         static void train() {
-            static constexpr float MUTATION_FREQUENCY = 1.f;
+            static constexpr float MUTATION_FREQUENCY = 0.9f;
             static constexpr float MUTATION_MAGNITUDE = 1.f;
-            static constexpr size_t MUTATION_ROUNDS = 20000;
-            static constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 100;
+            static constexpr size_t MUTATION_ROUNDS = 200000;
+            static constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 7; // Standard benchmark = 100
 
             // Shuffle the original boards
             Utility::shuffleVector(original_boards);
@@ -107,19 +127,27 @@ public:
 
             // Perform mutation rounds
             for (unsigned int k = 0; k < MUTATION_ROUNDS; k++) {
-                float round_accuracy = 0.f;
-
+                const std::vector<float>& random_mutation_frequency_floats
+                    = Utility::SIMDRandomBools(subshape_count, MUTATION_FREQUENCY);
+                const std::vector<float>& random_mutation_delta_floats
+                    = Utility::SIMDRandomFloats(subshape_count, MUTATION_MAGNITUDE);
                 current_weights = best_weights;
-                for (auto& weight : current_weights)
-                    weight += mutationTriggered(MUTATION_FREQUENCY) * mutationDelta(MUTATION_MAGNITUDE);
 
-                std::vector<float> board_accuracies(original_boards.size(), 0.f);
-                for (unsigned int i = 0; i < original_boards.size(); i++) {
-                    for (auto& subshape_index : original_boards[i].subshape_indicies)
-                        board_accuracies[i] += current_weights[subshape_index];
-                    board_accuracies[i] = calculateAccuracy(board_accuracies[i], original_boards[i].m_known_evaluation_score);
+                const std::vector<float>& multiplied_floats = Utility::SIMDMultiply(random_mutation_delta_floats, random_mutation_frequency_floats);
+                const std::vector<float>& added_floats = Utility::SIMDAdd(current_weights, multiplied_floats);
+                current_weights = added_floats;
+
+                // Establish accuracy
+
+                std::vector<float> board_accuracies;
+                for (auto& board : original_boards) {
+                    float score = 0.f;
+                    for (auto& subshape_index : board.subshape_indicies)
+                        score += current_weights[subshape_index];
+                    board_accuracies.push_back(calculateAccuracy(score, board.m_known_evaluation_score));
                 }
 
+                float round_accuracy = 0.f;
                 for (auto& accuracy : board_accuracies)
                     round_accuracy += accuracy;
                 round_accuracy /= original_boards.size();
@@ -134,6 +162,8 @@ public:
             }
 
             std::cout << "Model accuracy: " << best_accuracy * 100 << "%" << std::endl;
+            testModelOnBoard(best_weights, original_boards[4]);
+            //testModelOnHiddenBoards(best_weights, 20);
             //for (auto& map_shape : subshape_map)
                 //std::cout << "Subshape score: " << best_weights[map_shape.second] << std::endl;
         }
