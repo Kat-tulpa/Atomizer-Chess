@@ -1,8 +1,12 @@
-#pragma once
+﻿#pragma once
 #include <cstdint>
 #include <string>
 #include <vector>
 #include <functional>
+#include <cwchar>
+#include <iostream>
+#include <io.h>
+#include <fcntl.h>
 
 #include "Utility.h"
 
@@ -50,6 +54,60 @@ public:
             && m_offset.m_x == other.m_offset.m_x
             && m_offset.m_y == other.m_offset.m_y
             && m_data == other.m_data;
+    }
+
+    void print() const {
+        _setmode(_fileno(stdout), _O_U8TEXT);
+        for (unsigned int y = 0; y < m_dimensions.m_height; y++) {
+            for (unsigned int x = 0; x < m_dimensions.m_width; x++) {
+                wchar_t print_char;
+                switch (m_data[y * m_dimensions.m_width + x]) {
+                case 'k':
+                    print_char = L'♔'; // Unicode value for ♔
+                    break;
+                case 'q':
+                    print_char = L'♕'; // Unicode value for ♕
+                    break;
+                case 'r':
+                    print_char = L'♖'; // Unicode value for ♖
+                    break;
+                case 'b':
+                    print_char = L'♗'; // Unicode value for ♗
+                    break;
+                case 'n':
+                    print_char = L'♘'; // Unicode value for ♘
+                    break;
+                case 'p':
+                    print_char = L'♙'; // Unicode value for ♙
+                    break;
+                case 'K':
+                    print_char = L'♚'; // Unicode value for ♚
+                    break;
+                case 'Q':
+                    print_char = L'♛'; // Unicode value for ♛
+                    break;
+                case 'R':
+                    print_char = L'♜'; // Unicode value for ♜
+                    break;
+                case 'B':
+                    print_char = L'♝'; // Unicode value for ♝
+                    break;
+                case 'N':
+                    print_char = L'♞'; // Unicode value for ♞
+                    break;
+                case 'P':
+                    print_char = L'♟'; // Unicode value for ♟
+                    break;
+                default:
+                    // Default case for unknown characters
+                    print_char = m_data[y * m_dimensions.m_width + x];
+                    break;
+                }
+                std::wcout << print_char;
+            }
+            std::wcout << std::endl;
+        }
+        std::wcout << std::endl;
     }
 
     auto getType() const { return m_type; }
