@@ -6,6 +6,7 @@
 #include <numeric>
 #include <random>
 #include <unordered_set>
+#include <cstdlib>
 
 #include "Geometric Decomposition.h"
 #include "Shape.h"
@@ -34,7 +35,7 @@ public:
             m_shape(shape)
         {
             subshapes = GeometricDecomposition::all(m_shape);
-            subshape_indicies.reserve(subshapes.size());
+            subshape_indicies.assign(subshapes.size(), 0);
         }
     };
 
@@ -75,115 +76,67 @@ public:
             return random < probability;
         }
 
-        static std::vector<Shape>& mergeVectorsWithoutDuplicates(const std::vector<Shape>& vec1, const std::vector<Shape>& vec2) {
-            std::vector<Shape> merged_shapes;
-            std::vector<Shape> other_vec;
-
-            if (vec1.size() > vec2.size()) {
-                merged_shapes = vec1;
-                other_vec = vec2;
-            }
-            else {
-                merged_shapes = vec2;
-                other_vec = vec1;
-            }
-
-            for (unsigned int i = 0; i < other_vec.size(); i++) {
-                bool already_exists = false;
-                for (unsigned int j = 0; j < merged_shapes.size(); j++)
-                    if (merged_shapes[j] == other_vec[i]) {
-                        already_exists = false;
-                        break;
-                    }
-                if (!already_exists)
-                    merged_shapes.push_back(other_vec[i]);
-            }
-
-            return merged_shapes;
-        }
-
         static void train() {
-            constexpr float MUTATION_FREQUENCY = 0.005f;
-            constexpr float MUTATION_MAGNITUDE = 4.f;
-            constexpr size_t MUTATION_ROUNDS = 200;
-            constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 5;
+            static constexpr float MUTATION_FREQUENCY = 1.f;
+            static constexpr float MUTATION_MAGNITUDE = 1.f;
+            static constexpr size_t MUTATION_ROUNDS = 20000;
+            static constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 100;
 
-            // Prepare indexes for original board samples
-            std::vector<size_t> original_board_sample_indexes;
-            original_board_sample_indexes.reserve(ORIGINAL_BOARD_SAMPLE_SIZE);
-            for (unsigned int i = 0; i < MUTATION_ROUNDS; i++)
-                for (unsigned int j = 0; j < ORIGINAL_BOARD_SAMPLE_SIZE; j++)
-                    original_board_sample_indexes.emplace_back(rand() % original_boards.size());
+            // Shuffle the original boards
+            Utility::shuffleVector(original_boards);
 
             // Prepare subshapes for training
             std::unordered_map<Shape, size_t> subshape_map;
-            std::vector<Shape> subshapes;
-            for (unsigned int i = 0; i < ORIGINAL_BOARD_SAMPLE_SIZE; i++) {
-                const std::vector<Shape> tmp_subshapes = original_boards[i].subshapes;
-                for (unsigned int j = 0; j < tmp_subshapes.size(); j++) {
-                    const size_t index = subshape_map.size();
-                    original_boards[i].subshape_indicies.emplace_back(index);
-                    subshape_map[original_boards[i].subshapes[j]] = index;
-                }
-            }
+            size_t index = 0;
+            for (auto& board : original_boards)
+                for (unsigned int i = 0; i < board.subshape_indicies.size(); i++)
+                    if (subshape_map.insert(std::make_pair(board.subshapes[i], index)).second)
+                        board.subshape_indicies[i] = index++;
+                    else
+                        board.subshape_indicies[i] = subshape_map.find(board.subshapes[i])->second;
+            const size_t subshape_count = index;
 
-            // Calculate subshape indices for original board samples
-            for (unsigned int i = 0; i < ORIGINAL_BOARD_SAMPLE_SIZE; i++) {
-                OriginalBoard& board = original_boards[original_board_sample_indexes[i]];
-                board.subshape_indicies.reserve(board.subshapes.size());
-                for (unsigned int j = 0; j < board.subshapes.size(); j++) {
-                    auto it = subshape_map.find(board.subshapes[j]);
-                    if (it != subshape_map.end()) {
-                        const size_t shape_index = it->second;
-                        board.subshape_indicies.emplace_back(shape_index);
-                    }
-                    // handle case where subshape is not found in the map
-                    // you can choose to ignore, skip, or raise an error based on your requirement
-                }
-            }
+            // Initialize weights
+            std::vector<float> best_weights(subshape_count, 0.f);
+            std::vector<float> current_weights(subshape_count, 0.f);
+            float best_accuracy = 0.f;
 
-            // Initialize highest scoring weights
-            std::vector<float> highest_scoring_weights(subshape_map.size(), 0.f);
-            float highest_accuracy = 0.f;
+            float expected_score = 0.f;
+            for (auto& board : original_boards)
+                expected_score += board.m_known_evaluation_score;
 
             // Perform mutation rounds
             for (unsigned int k = 0; k < MUTATION_ROUNDS; k++) {
-                // Reset weights to highest scoring and mutate
-                std::vector<float> current_scoring_weights = highest_scoring_weights;
-                for (auto& current_weight : current_scoring_weights)
-                    current_weight += mutationTriggered(MUTATION_FREQUENCY) * mutationDelta(MUTATION_MAGNITUDE);
+                float round_accuracy = 0.f;
 
-                // Calculate average accuracy on all boards
-                float average_accuracy_on_all_boards = 0.f;
-                for (unsigned int i = 0; i < ORIGINAL_BOARD_SAMPLE_SIZE; i++) {
-                    float score_on_current_board = 0.f;
-                    const OriginalBoard& current_board = original_boards[original_board_sample_indexes[i]];
-                    const size_t subshape_count = current_board.subshapes.size();
-                    for (size_t index : current_board.subshape_indicies) {
-                        score_on_current_board += current_scoring_weights[index];
-                    }
-                    const float accuracy_on_current_board = calculateAccuracy(score_on_current_board, current_board.m_known_evaluation_score);
-                    average_accuracy_on_all_boards += accuracy_on_current_board;
-                }
-                average_accuracy_on_all_boards /= ORIGINAL_BOARD_SAMPLE_SIZE;
+                current_weights = best_weights;
+                for (auto& weight : current_weights)
+                    weight += mutationTriggered(MUTATION_FREQUENCY) * mutationDelta(MUTATION_MAGNITUDE);
 
-                // Update highest accuracy and scoring weights if necessary
-                if (average_accuracy_on_all_boards > highest_accuracy) {
-                    highest_accuracy = average_accuracy_on_all_boards;
-                        highest_scoring_weights = current_scoring_weights;
+                std::vector<float> board_accuracies(original_boards.size(), 0.f);
+                for (unsigned int i = 0; i < original_boards.size(); i++) {
+                    for (auto& subshape_index : original_boards[i].subshape_indicies)
+                        board_accuracies[i] += current_weights[subshape_index];
+                    board_accuracies[i] = calculateAccuracy(board_accuracies[i], original_boards[i].m_known_evaluation_score);
                 }
 
-                //std::cout << "Current Generation Accuracy Was: " << average_accuracy_on_all_boards * 100 << "%" << std::endl;
+                for (auto& accuracy : board_accuracies)
+                    round_accuracy += accuracy;
+                round_accuracy /= original_boards.size();
+
+                if (round_accuracy > best_accuracy) {
+                    best_accuracy = round_accuracy;
+                    best_weights = current_weights;
+                }
+
+                if (k % 100 == 0)
+                    std::cout << "Round accuracy: " << round_accuracy * 100 << "%" << std::endl;
             }
 
-            std::cout << "Highest accuracy was: " << highest_accuracy * 100 << "%" << std::endl;
-
-            for (auto& map_shape : subshape_map) {
-                std::cout << "Subshape score: " << highest_scoring_weights[map_shape.second] << std::endl;
-                map_shape.first.print();
-            }
+            std::cout << "Model accuracy: " << best_accuracy * 100 << "%" << std::endl;
+            //for (auto& map_shape : subshape_map)
+                //std::cout << "Subshape score: " << best_weights[map_shape.second] << std::endl;
         }
-
     };
 
     static void init() {

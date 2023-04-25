@@ -7,6 +7,7 @@
 #include <iostream>
 #include <io.h>
 #include <fcntl.h>
+#include <cwchar>
 
 #include "Utility.h"
 
@@ -57,7 +58,6 @@ public:
     }
 
     void print() const {
-        _setmode(_fileno(stdout), _O_U8TEXT);
         for (unsigned int y = 0; y < m_dimensions.m_height; y++) {
             for (unsigned int x = 0; x < m_dimensions.m_width; x++) {
                 wchar_t print_char;
@@ -145,17 +145,37 @@ public:
     Dimensions m_dimensions;
     Offset m_offset;
     std::vector<char> m_data;
+
+    static size_t precomputed_hash_offsets[8][8];
+    static size_t precomputed_hash_type[Type::TYPE_COUNT];
 };
 
 namespace std {
+    constexpr size_t precomputed_hash_dimensions_or_offsets[8][8]{
+        { 0,  1,  2,  3,  4,  5,  6,  7  },
+        { 8,  9,  10, 11, 12, 13, 14, 15 },
+        { 16, 17, 18, 19, 20, 21, 22, 23 },
+        { 24, 25, 26, 27, 28, 29, 30, 31 },
+        { 32, 33, 34, 35, 36, 37, 38, 39 },
+        { 40, 41, 42, 43, 44, 45, 46, 47 },
+        { 48, 49, 50, 51, 52, 53, 54, 55 },
+        { 56, 57, 58, 59, 60, 61, 62, 63 }
+    };
+
+    constexpr size_t precomputed_hash_types[2] = { 0, 1 };
+
     template <>
     struct hash<Shape> {
         size_t operator()(const Shape& s) const {
-            size_t hash_value = static_cast<size_t>(s.getType());
-            hash_value ^= static_cast<size_t>(s.getWidth()) << 8;
-            hash_value ^= static_cast<size_t>(s.getHeight()) << 16;
-            hash_value ^= static_cast<size_t>(s.getOffsetX()) << 24;
-            hash_value ^= static_cast<size_t>(s.getOffsetY()) << 32;
+            // Precompute hash values for possible properties
+            const size_t type_hash
+                = static_cast<size_t>(precomputed_hash_types[s.m_type]);
+            const size_t dimension_offset_hash = 
+                precomputed_hash_dimensions_or_offsets[s.m_dimensions.m_width][s.m_dimensions.m_height];
+
+            // Combine hash values using bitwise XOR operations
+            size_t hash_value = type_hash ^ dimension_offset_hash ^ dimension_offset_hash;
+
             const auto& data = s.getData();
             for (const char& c : data) {
                 hash_value ^= static_cast<size_t>(c) << 40;
@@ -167,12 +187,18 @@ namespace std {
     template <>
     struct equal_to<Shape> {
         bool operator()(const Shape& s1, const Shape& s2) const {
-            return s1.getType() == s2.getType()
-                && s1.m_dimensions.m_width == s2.m_dimensions.m_width
+            static constexpr size_t size_of_member_vars_without_m_data
+                = sizeof(Shape) - sizeof(std::vector<char>);
+            return (memcmp(&s1, &s2, size_of_member_vars_without_m_data) == 0) && (s1.m_data == s2.m_data);
+
+            /* Alternative Implementation 
+            return s1.m_type == s2.m_type
                 && s1.m_dimensions.m_height == s2.m_dimensions.m_height
+                && s1.m_dimensions.m_width == s2.m_dimensions.m_width
                 && s1.m_offset.m_x == s2.m_offset.m_x
                 && s1.m_offset.m_y == s2.m_offset.m_y
-                && s1.getData() == s2.getData();
+                && s1.m_data == s2.m_data;
+                */
         }
     };
 }

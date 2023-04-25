@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <ctime>
 
 class Utility {
 public:
@@ -41,5 +42,17 @@ public:
                 return false;
         }
         return true;
+    }
+
+    template <typename T>
+    static void shuffleVector(std::vector<T>& vec) {
+        // Seed the random number generator
+        std::srand(std::time(0));
+
+        // Shuffle the vector using std::rand
+        for (size_t i = vec.size() - 1; i > 0; --i) {
+            size_t j = std::rand() % (i + 1);
+            std::swap(vec[i], vec[j]);
+        }
     }
 };
