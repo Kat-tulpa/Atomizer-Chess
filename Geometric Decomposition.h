@@ -25,7 +25,6 @@ public:
                         for (int x2 = x1; x2 < x1 + w; ++x2) {
                             for (int y2 = y1; y2 < y1 + h; ++y2) {
                                 subrect_data.push_back(parent_data[x2 * parent_height + y2]);
-                                //std::cout << parent_data[x2 * parent_height + y2] << std::endl;
                             }
                         }
 

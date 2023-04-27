@@ -3,11 +3,6 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <cwchar>
-#include <iostream>
-#include <io.h>
-#include <fcntl.h>
-#include <cwchar>
 
 #include "Utility.h"
 
@@ -57,59 +52,6 @@ public:
             && m_data == other.m_data;
     }
 
-    void print() const {
-        for (unsigned int y = 0; y < m_dimensions.m_height; y++) {
-            for (unsigned int x = 0; x < m_dimensions.m_width; x++) {
-                wchar_t print_char;
-                switch (m_data[y * m_dimensions.m_width + x]) {
-                case 'k':
-                    print_char = L'♔'; // Unicode value for ♔
-                    break;
-                case 'q':
-                    print_char = L'♕'; // Unicode value for ♕
-                    break;
-                case 'r':
-                    print_char = L'♖'; // Unicode value for ♖
-                    break;
-                case 'b':
-                    print_char = L'♗'; // Unicode value for ♗
-                    break;
-                case 'n':
-                    print_char = L'♘'; // Unicode value for ♘
-                    break;
-                case 'p':
-                    print_char = L'♙'; // Unicode value for ♙
-                    break;
-                case 'K':
-                    print_char = L'♚'; // Unicode value for ♚
-                    break;
-                case 'Q':
-                    print_char = L'♛'; // Unicode value for ♛
-                    break;
-                case 'R':
-                    print_char = L'♜'; // Unicode value for ♜
-                    break;
-                case 'B':
-                    print_char = L'♝'; // Unicode value for ♝
-                    break;
-                case 'N':
-                    print_char = L'♞'; // Unicode value for ♞
-                    break;
-                case 'P':
-                    print_char = L'♟'; // Unicode value for ♟
-                    break;
-                default:
-                    // Default case for unknown characters
-                    print_char = m_data[y * m_dimensions.m_width + x];
-                    break;
-                }
-                std::wcout << print_char;
-            }
-            std::wcout << std::endl;
-        }
-        std::wcout << std::endl;
-    }
-
     auto getType() const { return m_type; }
     auto getWidth() const { return m_dimensions.m_width; }
     auto getHeight() const { return m_dimensions.m_height; }
@@ -139,6 +81,15 @@ public:
                 return false; // data does not match, subshape not contained
         }
         return true; // all data matched, subshape is contained
+    }
+    
+    void print() {
+        for (unsigned int y = 0; y < m_dimensions.m_height; y++) {
+            for (unsigned int x = 0; x < m_dimensions.m_width; x++)
+                std::cout << m_data[(m_dimensions.m_width * y) + x];
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
     }
 
     Type m_type;
