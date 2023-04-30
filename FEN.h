@@ -36,7 +36,7 @@ public:
             DataShape::Type::RECTANGLE_SQUARE,
             DataShape::Dimensions{8, 8},
             DataShape::Offset{8, 8},
-            Utility::stringToVector(board)
+            Utility::stringToCharVector(board)
         };
     }
 

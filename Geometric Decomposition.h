@@ -29,8 +29,12 @@ public:
                         }
 
                         if (!Utility::isAllThisChar(subrect_data, ' ')) {
-                            const DataShape DataShape(DataShape::Type::RECTANGLE, DataShape::Dimensions(w, h), DataShape::Offset(x1, y1), subrect_data);
-                            DataShape_list.emplace_back(DataShape);
+                            DataShape_list.emplace_back(
+                                DataShape::Type::RECTANGLE, 
+                                DataShape::Dimensions(w, h), 
+                                DataShape::Offset(x1, y1), 
+                                subrect_data
+                            );
                         }
                     }
                 }

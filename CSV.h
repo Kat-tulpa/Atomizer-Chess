@@ -8,7 +8,7 @@
 class CSV {
 private:
     static constexpr size_t DEFAULT_MAX_LINE_LENGTH = 256;
-    static constexpr size_t CUTOFF_LINE_COUNT = 500; // Default benchmark = 100
+    static constexpr size_t CUTOFF_LINE_COUNT = 5000; // Default benchmark = 100
 
 
 

@@ -11,7 +11,7 @@ class DataShape {
 public:
     struct Dimensions {
         Dimensions(size_t width, size_t height) : m_width(width), m_height(height) {}
-        auto getCategorizationPrefix() const { return std::string(2, static_cast<char>(m_width) + static_cast<char>(m_height)); }
+        auto getCategorizationPrefix() const { return std::to_string(m_width) + std::to_string(m_height); }
 
         size_t m_width;
         size_t m_height;
@@ -19,7 +19,7 @@ public:
 
     struct Offset {
         Offset(size_t x, size_t y) : m_x(x), m_y(y) {}
-        auto getCategorizationPrefix() const { return std::string(2, static_cast<char>(m_x) + static_cast<char>(m_y)); }
+        auto getCategorizationPrefix() const { return std::to_string(m_x) + std::to_string(m_y); }
 
         size_t m_x;
         size_t m_y;
@@ -33,6 +33,13 @@ public:
 
     DataShape(const Type type, const Dimensions dimensions, const Offset offset, std::vector<char> data)
         : m_type(type), m_dimensions(dimensions), m_offset(offset), m_data(data)
+    {}
+
+    DataShape(const std::string& as_string)
+        : m_type(RECTANGLE_SQUARE),
+        m_dimensions(Dimensions{ static_cast<size_t>(as_string[0]), static_cast<size_t>(as_string[1]) }),
+        m_offset(Offset{ static_cast<size_t>(as_string[2]), static_cast<size_t>(as_string[3]) }),
+        m_data(Utility::stringToCharVector(as_string.substr(4)))
     {}
 
     bool operator==(const DataShape& other) const {
@@ -77,6 +84,10 @@ public:
             std::cout << std::endl;
         }
         std::cout << std::endl;
+    }
+
+    const std::string asString() const {
+        return getCategorizationPrefix() + std::string(m_data.begin(), m_data.end());
     }
 
     Type m_type;

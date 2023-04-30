@@ -10,6 +10,7 @@ public:
     }
 
     result_type operator()() {
+        static constexpr result_type UINT64_T_LIMIT = static_cast<result_type>(std::numeric_limits<uint64_t>::max());
         const uint64_t result_starstar = rotl(s[1] * 5, 7) * 9;
         const uint64_t t = s[1] << 17;
 
@@ -21,11 +22,12 @@ public:
 
         s[3] = rotl(s[3], 45);
 
-        const auto ret_value = static_cast<result_type>(result_starstar) / static_cast<result_type>(std::numeric_limits<uint64_t>::max());
-        return ret_value;
+        return static_cast<result_type>(result_starstar) / UINT64_T_LIMIT;
     }
 
 private:
+
+
     static uint64_t rotl(const uint64_t x, int k) {
         return (x << k) | (x >> (64 - k));
     }

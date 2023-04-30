@@ -17,7 +17,7 @@ public:
         return charArray;
     }
 
-    static std::vector<char> stringToVector(const std::string& str) {
+    static std::vector<char> stringToCharVector(const std::string& str) {
         return std::vector<char>(str.begin(), str.end());
     }
 

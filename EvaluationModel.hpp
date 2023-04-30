@@ -1,13 +1,14 @@
 #pragma once
 #include "OriginalBoard.hpp"
 #include "Xoshiro.hpp"
+#include "RadixTree.hpp"
 
 class EvaluationModel {
 private:
-    static constexpr float MUTATION_FREQUENCY = 0.1f;
-    static constexpr float MUTATION_MAGNITUDE = 1.f;
+    static constexpr float MUTATION_FREQUENCY = 0.05f;
+    static constexpr float MUTATION_MAGNITUDE = 0.1f;
     static constexpr size_t MUTATION_ROUNDS = 200000;
-    static constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 500; // Standard benchmark = 100
+    static constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 5000; // Standard benchmark = 100
 
     std::vector<float> m_best_weights;
     std::vector<float> m_current_weights;
@@ -15,8 +16,8 @@ private:
     float m_round_accuracy;
     Xoshiro256ss m_rng;
 
-    std::unordered_map<DataShape, size_t> m_subDataShape_map;
-    std::vector<std::pair<DataShape, size_t>> m_subDataShapes;
+    RadixTree m_subDataShape_tree;
+    std::vector<std::pair<const std::string, size_t>> m_subDataShapes;
     size_t m_subDataShape_count;
 
 public:
@@ -70,12 +71,15 @@ public:
         size_t index = 0;
         for (unsigned int i = 0; i < m_original_boards.size(); i++) {
             for (unsigned int j = 0; j < m_original_boards[i].subDataShapes.size(); j++) {
-                auto subDataShape_inserted = m_subDataShape_map.insert(std::make_pair(m_original_boards[i].subDataShapes[j], index));
-                if (subDataShape_inserted.second)
+                const std::string& sub_data_shape_as_string = m_original_boards[i].subDataShapes[j].asString();
+                const std::pair<bool, size_t>& already_exists = m_subDataShape_tree.search(sub_data_shape_as_string);
+                if (already_exists.first)
+                    m_original_boards[i].subDataShape_indicies[j] = already_exists.second;
+                else {
+                    m_subDataShape_tree.insert(sub_data_shape_as_string, index);
                     m_original_boards[i].subDataShape_indicies[j] = index++;
-                else
-                    m_original_boards[i].subDataShape_indicies[j] = subDataShape_inserted.first->second;
-                m_subDataShapes.push_back(std::make_pair(m_original_boards[i].subDataShapes[j], index));
+                }
+                m_subDataShapes.push_back(std::make_pair(sub_data_shape_as_string, index));
             }
             m_original_boards[i].subDataShapes.clear();
         }
@@ -98,10 +102,8 @@ public:
 
         // Mutate current weights
         for (unsigned int i = 0; i < m_subDataShape_count; i++) {
-            float mutation = (2 * m_rng() - 1) * MUTATION_MAGNITUDE;
-            if (m_rng() < MUTATION_FREQUENCY) {
-                m_current_weights[i] += mutation;
-            }
+            const bool should_mutate = m_rng() < MUTATION_FREQUENCY;
+            m_current_weights[i] += (2 * m_rng() - 1) * should_mutate * MUTATION_MAGNITUDE;
         }
 
         // Calculate board accuracies
@@ -116,8 +118,7 @@ public:
 
         // Calculate round accuracy
         m_round_accuracy = std::accumulate(board_accuracies.begin(),
-            board_accuracies.begin() + ORIGINAL_BOARD_SAMPLE_SIZE,
-            0.f) / ORIGINAL_BOARD_SAMPLE_SIZE;
+            board_accuracies.begin() + ORIGINAL_BOARD_SAMPLE_SIZE, 0.f) / ORIGINAL_BOARD_SAMPLE_SIZE;
 
         // Update best accuracy and weights if current round is better
         if (m_round_accuracy > m_best_accuracy) {
@@ -151,7 +152,7 @@ public:
         for (unsigned int k = 0; k < MUTATION_ROUNDS; k++) {
             performWeightMutationsAndSetIfBest();
 
-            if (k % 1000 == 0) // Don't spam the console
+            if (k % 100 == 0) // Don't spam the console
                 std::cout << "Round accuracy: " << m_round_accuracy * 100 << "%" << std::endl;
         }
         print();
