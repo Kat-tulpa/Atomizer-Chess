@@ -35,7 +35,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -134,7 +134,8 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,20 +148,16 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Chess.h" />
+    <ClInclude Include="ChessManager.hpp" />
     <ClInclude Include="CSV.h" />
-    <ClInclude Include="DArray.h" />
+    <ClInclude Include="EvaluationModel.hpp" />
     <ClInclude Include="FEN.h" />
-    <ClInclude Include="FixedPoint.h" />
-    <ClInclude Include="FlatBuffer.h" />
-    <ClInclude Include="FlatTypes.h" />
     <ClInclude Include="Geometric Decomposition.h" />
+    <ClInclude Include="OriginalBoard.hpp" />
     <ClInclude Include="RandomDevice.h" />
-    <ClInclude Include="SequenceManager.h" />
-    <ClInclude Include="Shape.h" />
-    <ClInclude Include="ShapeMap.h" />
-    <ClInclude Include="ThreadCount.h" />
+    <ClInclude Include="DataShape.h" />
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="Xoshiro.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

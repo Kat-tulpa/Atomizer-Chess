@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Chess">
+      <UniqueIdentifier>{5e528f2a-ed14-4cf2-b4b6-dc9fd92b9db6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DataShape">
+      <UniqueIdentifier>{4a1d23c7-f74a-4cf8-ab01-8b0b6e6205c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -20,46 +26,34 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SequenceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Chess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadCount.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RandomDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CSV.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DArray.h">
+    <ClInclude Include="Utility.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChessManager.hpp">
+      <Filter>Header Files\Chess</Filter>
     </ClInclude>
     <ClInclude Include="FEN.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Chess</Filter>
     </ClInclude>
-    <ClInclude Include="FixedPoint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FlatBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FlatTypes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="OriginalBoard.hpp">
+      <Filter>Header Files\Chess</Filter>
     </ClInclude>
     <ClInclude Include="Geometric Decomposition.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\DataShape</Filter>
     </ClInclude>
-    <ClInclude Include="Shape.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="DataShape.h">
+      <Filter>Header Files\DataShape</Filter>
     </ClInclude>
-    <ClInclude Include="ShapeMap.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="EvaluationModel.hpp">
+      <Filter>Header Files\Chess</Filter>
     </ClInclude>
-    <ClInclude Include="Utility.h">
+    <ClInclude Include="Xoshiro.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
