@@ -6,11 +6,20 @@
 #include <stdexcept>
 
 class CSV {
+private:
     static constexpr size_t DEFAULT_MAX_LINE_LENGTH = 256;
-    static constexpr size_t CUTOFF_LINE_COUNT = 1000; // Default benchmark = 100
+    static constexpr size_t CUTOFF_LINE_COUNT = 500; // Default benchmark = 100
+
+
+
+
+
+    std::string m_file_name;
+    std::ifstream m_file;
+    size_t m_max_line_length;
+    size_t m_line_count;
 
 public:
-
     CSV(const std::string& filename) : m_file_name(filename), m_file(filename), 
         m_max_line_length(DEFAULT_MAX_LINE_LENGTH), m_line_count(0) {
         if(!m_file.is_open())
@@ -25,12 +34,9 @@ public:
         m_file.open(m_file_name);
     }
 
-
     void open(const std::string& file_name) { m_file.open(file_name); m_file_name = file_name; }
     void close() { m_file.close(); }
-
     void setMaxLineLength(const size_t _length) { m_max_line_length = _length; }
-
     auto getLineCount() { return m_line_count; }
     auto getMaxLineLength() { return m_max_line_length; }
     std::ifstream& getFileStream() { return m_file; }
@@ -75,10 +81,4 @@ public:
 
         return fields;
     }
-
-private:
-    std::string m_file_name;
-    std::ifstream m_file;
-    size_t m_max_line_length;
-    size_t m_line_count;
 };

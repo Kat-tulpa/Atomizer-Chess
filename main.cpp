@@ -1,8 +1,7 @@
-#include "Chess.h"
+#include "ChessManager.hpp"
+#include "EvaluationModel.hpp"
 
 int main() {
-    Chess::init();
-    Chess::EvaluationModel eval_model;
-    eval_model.train();
+    ChessManager::init();
     return 0;
 }

@@ -3,18 +3,18 @@
 #include <string>
 #include <iostream>
 
-#include "Shape.h"
+#include "DataShape.h"
 
 class GeometricDecomposition {
 
 public:
 
-    typedef std::vector<Shape> ShapeList;
+    typedef std::vector<DataShape> DataShapeList;
 
-    static void quadrilateralsRectangleAll(const Shape& parent_shape, ShapeList& shape_list) {
-        const auto& parent_data = parent_shape.getData();
-        const unsigned int parent_width = parent_shape.getWidth();
-        const unsigned int parent_height = parent_shape.getHeight();
+    static void quadrilateralsRectangleAll(const DataShape& parent_DataShape, DataShapeList& DataShape_list) {
+        const auto& parent_data = parent_DataShape.m_data;
+        const unsigned int parent_width = parent_DataShape.m_dimensions.m_width;
+        const unsigned int parent_height = parent_DataShape.m_dimensions.m_height;
 
         for (int w = parent_width; w >= 1; --w) {
             for (int h = parent_height; h >= 1; --h) {
@@ -29,19 +29,19 @@ public:
                         }
 
                         if (!Utility::isAllThisChar(subrect_data, ' ')) {
-                            Shape shape(Shape::Type::RECTANGLE, Shape::Dimensions(w, h), Shape::Offset(x1, y1), subrect_data);
-                            shape_list.emplace_back(std::move(shape));
+                            const DataShape DataShape(DataShape::Type::RECTANGLE, DataShape::Dimensions(w, h), DataShape::Offset(x1, y1), subrect_data);
+                            DataShape_list.emplace_back(DataShape);
                         }
                     }
                 }
             }
         }
-        shape_list.erase(shape_list.begin());
+        DataShape_list.erase(DataShape_list.begin());
     }
 
-    static ShapeList all(const Shape& parent_shape) {
-        ShapeList shape_list;
-        quadrilateralsRectangleAll(parent_shape, shape_list);
-        return shape_list;
+    static DataShapeList all(const DataShape& parent_DataShape) {
+        DataShapeList DataShape_list;
+        quadrilateralsRectangleAll(parent_DataShape, DataShape_list);
+        return DataShape_list;
     }
 };

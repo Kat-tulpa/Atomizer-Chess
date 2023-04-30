@@ -3,14 +3,14 @@
 #include <string>
 #include <vector>
 
-#include "Shape.h"
+#include "DataShape.h"
 #include "Utility.h"
 
 class FEN {
 
 public:
 
-    static const Shape positionStringToShape(const std::string& fen) {
+    static const DataShape positionStringToDataShape(const std::string& fen) {
         std::string board(64, ' ');
 
         int rank = 7, file = 0;
@@ -32,10 +32,10 @@ public:
         std::transform(board.begin(), board.end(), board.begin(),
             [](char c) { return (isdigit(c) ? ' ' : c); });
 
-        return Shape{
-            Shape::Type::RECTANGLE_SQUARE,
-            Shape::Dimensions{8, 8},
-            Shape::Offset{8, 8},
+        return DataShape{
+            DataShape::Type::RECTANGLE_SQUARE,
+            DataShape::Dimensions{8, 8},
+            DataShape::Offset{8, 8},
             Utility::stringToVector(board)
         };
     }
@@ -62,5 +62,24 @@ public:
         }
 
         return isPositive ? static_cast<float>(value) : static_cast<float>(-value);
+    }
+
+    // Parses a signed integer from a std::string that includes "+, -, and #" chess notation to indicate engine evaluation score
+    static int parseEvalScore(std::string evalscore) {
+        if (evalscore[0] == '#') { // Checkmate in X moves
+
+            if (evalscore[1] == '+') {
+                return 9999 - std::stoi(evalscore.substr(2));
+            }
+            else if (evalscore[1] == '-') {
+                return -9999 + std::stoi(evalscore.substr(2));
+            }
+            else {
+                throw std::invalid_argument("Invalid evalscore format");
+            }
+        }
+        else {
+            return std::stoi(evalscore); // Regular Score
+        }
     }
 };

@@ -21,25 +21,6 @@ public:
         return std::vector<char>(str.begin(), str.end());
     }
 
-    // Parses a signed integer from a std::string that includes "+, -, and #" chess notation to indicate engine evaluation score
-    static int parseEvalScore(std::string evalscore) {
-        if (evalscore[0] == '#') { // Checkmate in X moves
-
-            if (evalscore[1] == '+') {
-                return 9999 - std::stoi(evalscore.substr(2));
-            }
-            else if (evalscore[1] == '-') {
-                return -9999 + std::stoi(evalscore.substr(2));
-            }
-            else {
-                throw std::invalid_argument("Invalid evalscore format");
-            }
-        }
-        else {
-            return std::stoi(evalscore); // Regular Score
-        }
-    }
-
     static bool isAllThisChar(const std::vector<char>& vec, const char c) {
         for (char v : vec) {
             if (v != c)
@@ -57,4 +38,20 @@ public:
             std::swap(vec[i], vec[j]);
         }
     }
+
+    static float toUnsignedFloat(uint64_t v) {
+        return static_cast<uint32_t>(v >> 40) * 0x1.0p-24f;
+    }
+
+    static float toSignedFloat(uint64_t v) {
+        return (static_cast<uint32_t>(v >> 40) * 0x1.0p-24f) * 2 - 1;
+    }
+
+    /* static float calculateAccuracy(float actual_result, float expected_result, float error_scaling_factor) {
+        float error = fabs(actual_result - expected_result);
+        if (expected_result != 0.0)
+            return 1.0 - (error / expected_result);
+        else
+            return 1.0 - (error / error_scaling_factor);
+    } */
 };
