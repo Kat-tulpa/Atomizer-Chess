@@ -2,159 +2,114 @@
 #include "OriginalBoard.hpp"
 #include "Xoshiro.hpp"
 #include "RadixTree.hpp"
+#include "IO.hpp"
+#include "Defs.hpp"
 
 class EvaluationModel {
 private:
-    static constexpr float MUTATION_FREQUENCY = 0.05f;
-    static constexpr float MUTATION_MAGNITUDE = 0.1f;
-    static constexpr size_t MUTATION_ROUNDS = 200000;
-    static constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 5000; // Standard benchmark = 100
-
-    std::vector<float> m_best_weights;
-    std::vector<float> m_current_weights;
-    float m_best_accuracy;
-    float m_round_accuracy;
-    Xoshiro256ss m_rng;
-
-    RadixTree m_subDataShape_tree;
-    std::vector<std::pair<const std::string, size_t>> m_subDataShapes;
-    size_t m_subDataShape_count;
+    RadixTree m_shape_feature_tree;
+    std::vector<OriginalBoard> m_original_boards;
+    std::vector<ShapeFeature> m_shape_features;
+    float m_mutation_frequency;
+    float m_mutation_magnitude;
+    float m_least_error;
+    size_t m_mutation_rounds;
+    size_t m_mapping_index;
 
 public:
-    std::vector<OriginalBoard> m_original_boards;
 
-    EvaluationModel(uint32_t rng_seed) :
-        m_rng(rng_seed),
-        m_best_accuracy(0.f),
-        m_round_accuracy(0.f),
-        m_subDataShape_count(0)
+
+    EvaluationModel() :
+        m_least_error(0.f),
+        m_mapping_index(0),
+        m_mutation_frequency(FREQUENCY_DEFAULT),
+        m_mutation_magnitude(MAGNITUDE_DEFAULT),
+        m_mutation_rounds(ROUNDS_DEFAULT)
     {}
 
-    static float calculateAccuracy(float actual_result, float expected_result) {
-        float error = fabs(actual_result - expected_result);
-        float accuracy = 0.0; // Initialize accuracy to 0.0
-
-        if (expected_result != 0.0)
-            accuracy = 1.0 - (error / expected_result);
-        else
-            // Assign high accuracy when actual_result is close to 0, and low accuracy otherwise
-            accuracy = (actual_result <= 0.0) ? 1.0 : 0.0;
-
-        // Ensure accuracy is within the valid range of 0.0 to 1.0
-        accuracy = fmax(0.0, fmin(1.0, accuracy));
-
-        return accuracy;
+    void insertShapeFeature(const std::string& serialized_shape_feature) {
+        m_shape_feature_tree.insert(serialized_shape_feature, m_mapping_index);
+        m_shape_features.emplace_back(serialized_shape_feature, m_mapping_index);
+        board.subDataShape_indicies.push_back(m_mapping_index);
     }
 
-    static const std::vector<float> mapOfParentWeights(const std::vector<float>& weights, const OriginalBoard& board) {
-        std::vector<float> resolved_weights;
-        for (auto& subDataShape_index : board.subDataShape_indicies)
-            resolved_weights.push_back(weights[subDataShape_index]);
-        return resolved_weights;
-    }
-
-    static void testModelOnBoard(const std::vector<float>& weights, const OriginalBoard& board) {
-        const std::vector<float>& these_weights = mapOfParentWeights(weights, board);
-        float score = 0.f;
-        for (auto& subDataShape_index : board.subDataShape_indicies)
-            score += weights[subDataShape_index];
-        std::cout << "Model's accuracy against this board was: " <<
-            calculateAccuracy(score, board.m_known_evaluation_score) * 100 << "%" << std::endl;
-    }
-
-    void testModelOnHiddenBoards(const std::vector<float>& weights, const size_t hidden_board_count) {
-        for (unsigned int i = 0; i < hidden_board_count; i++)
-            testModelOnBoard(weights, m_original_boards[m_original_boards.size() - hidden_board_count + i]);
-    }
-
-    void prepareSubDataShapes() {
-        size_t index = 0;
-        for (unsigned int i = 0; i < m_original_boards.size(); i++) {
-            for (unsigned int j = 0; j < m_original_boards[i].subDataShapes.size(); j++) {
-                const std::string& sub_data_shape_as_string = m_original_boards[i].subDataShapes[j].asString();
-                const std::pair<bool, size_t>& already_exists = m_subDataShape_tree.search(sub_data_shape_as_string);
-                if (already_exists.first)
-                    m_original_boards[i].subDataShape_indicies[j] = already_exists.second;
-                else {
-                    m_subDataShape_tree.insert(sub_data_shape_as_string, index);
-                    m_original_boards[i].subDataShape_indicies[j] = index++;
-                }
-                m_subDataShapes.push_back(std::make_pair(sub_data_shape_as_string, index));
-            }
-            m_original_boards[i].subDataShapes.clear();
+    void mapShapeFeatureToTreeIndex(OriginalBoard& board, const DataShape& shape) {
+        size_t mapping_index = 0;
+        const std::string& sub_data_shape_as_string = shape.asString();
+        const auto& [exists, existing_index] = m_subDataShape_tree.search(sub_data_shape_as_string);
+        if (exists) {
+            board.subDataShape_indicies.push_back(existing_index);
         }
-        m_subDataShape_count = index;
+        else {
+            insertSubDataShapeTreeIndexPair(sub_data_shape_as_string);
+        }
     }
 
-    void prepareWeights() {
-        m_best_weights.assign(m_subDataShape_count, 0.f);
-        m_current_weights.assign(m_subDataShape_count, 0.f);
-        m_best_accuracy = 0.f;
+    void mapAllSubDataShapesToTreeIndex() {
+        for (auto& board : m_original_boards)
+            for (auto& shape : board.subDataShapes)
+                mapSubDataShapeToTreeIndex(board, shape);
+        board.subDataShapes.clear();
+        m_subDataShape_count = m_mapping_index;
     }
 
-    void shuffleOriginalBoards() {
-        Utility::shuffleVector(m_original_boards);
+    static float calculateError(float actual_result, float expected_result) {
+        return std::fabs(actual_result - expected_result) 
+            / Chess::ORIGINAL_BOARD_SAMPLE_SIZE;
+    }
+
+    float calculateScore(const OriginalBoard& board, 
+        const std::vector<float>& weights) {
+
+        float score = 0.0;
+        for (unsigned int j = 0; j < board.subDataShape_indicies.size(); j++)
+            score += weights[board.subDataShape_indicies[j]];
+        return score;
+    }
+
+    float calculateAllErrors(const std::vector<OriginalBoard>& original_boards, 
+        const std::vector<float>& current_weights) {
+
+        float all_errors = 0.0;
+        for (unsigned int i = 0; i < original_boards.size(); i++) {
+            const OriginalBoard& board = original_boards[i];
+            float score = calculateScore(board, current_weights);
+            float expected_score = calculateExpectedScore(board.m_known_evaluation_score);
+            all_errors += calculateError(score, expected_score);
+        }
+        return all_errors;
+    }
+
+    float calculateExpectedScore(float known_evaluation_score) {
+        if (known_evaluation_score > 0.f)
+            return std::min(known_evaluation_score, EVALUATION_MAX);
+        return std::max(known_evaluation_score, EVALUATION_MIN);
+    }
+
+    float calculateError(float score, float expected_score) {
+        return std::abs(score - expected_score);
     }
 
     void performWeightMutationsAndSetIfBest() {
-        // Copy best weights to current weights
-        m_current_weights = m_best_weights;
-
-        // Mutate current weights
-        for (unsigned int i = 0; i < m_subDataShape_count; i++) {
-            const bool should_mutate = m_rng() < MUTATION_FREQUENCY;
-            m_current_weights[i] += (2 * m_rng() - 1) * should_mutate * MUTATION_MAGNITUDE;
-        }
-
-        // Calculate board accuracies
-        std::vector<float> board_accuracies;
-        for (const auto& board : m_original_boards) {
-            float score = 0.f;
-            for (const auto& index : board.subDataShape_indicies) {
-                score += m_current_weights[index];
-            }
-            board_accuracies.push_back(calculateAccuracy(score, board.m_known_evaluation_score));
-        }
-
-        // Calculate round accuracy
-        m_round_accuracy = std::accumulate(board_accuracies.begin(),
-            board_accuracies.begin() + ORIGINAL_BOARD_SAMPLE_SIZE, 0.f) / ORIGINAL_BOARD_SAMPLE_SIZE;
-
-        // Update best accuracy and weights if current round is better
-        if (m_round_accuracy > m_best_accuracy) {
-            m_best_accuracy = m_round_accuracy;
-            m_best_weights = m_current_weights;
+        m_current_weights = m_least_error_weights;
+        for (unsigned int i = 0; i < m_current_weights.size(); i++)
+            m_current_weights[i] += (2 * rng() - 1) * (rng() < m_mutation_frequency);
+        if (testError() < m_least_error) {
+            m_least_error = testError();
+            m_least_error_weights = m_current_weights;
         }
     }
 
-    void print() {
-        std::cout << "Model accuracy: " << m_best_accuracy * 100 << "%" << std::endl;
-
-        std::vector<std::pair<DataShape, float>> subDataShape_scores;
-        for (const auto& subDataShape_pair : m_subDataShapes) {
-            subDataShape_scores.emplace_back(subDataShape_pair.first, m_best_weights[subDataShape_pair.second]);
-        }
-
-        std::sort(subDataShape_scores.begin(), subDataShape_scores.end(),
-            [](const auto& a, const auto& b) { return a.second > b.second; });
-
-        for (const auto& subDataShape_score_pair : subDataShape_scores) {
-            std::cout << "SubDataShape Score: " << subDataShape_score_pair.second << std::endl;
-            subDataShape_score_pair.first.print();
-        }
+    std::vector<std::string> reverseMap() {
+        std::vector<std::string> reverse_map(m_subDataShape_count);
+        for (unsigned int i = 0; i < m_subDataShape_count; i++)
+            reverse_map[m_subDataShapes[i].second] = m_subDataShapes[i].first;
+        return reverse_map;
     }
 
     void train() {
-        //shuffleOriginalBoards();
-        prepareSubDataShapes();
-        prepareWeights();
-
-        for (unsigned int k = 0; k < MUTATION_ROUNDS; k++) {
+        for (unsigned int k = 0; k < m_mutation_rounds; k++)
             performWeightMutationsAndSetIfBest();
-
-            if (k % 100 == 0) // Don't spam the console
-                std::cout << "Round accuracy: " << m_round_accuracy * 100 << "%" << std::endl;
-        }
-        print();
+        Chess::IO::Print::model();
     }
 };

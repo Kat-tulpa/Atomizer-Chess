@@ -1,20 +1,17 @@
 #pragma once
-#include "Geometric Decomposition.h"
+#include <vector>
+#include "ShapeFeature.hpp"
+
+using namespace Chess::BoardProperties;
 
 class OriginalBoard {
+private:
+    const ShapeFeature m_shape_feature;
+    const float m_known_evaluation;
+
 public:
-
-    DataShape::Type m_type;
-    DataShape m_DataShape;
-    float m_known_evaluation_score;
-    std::vector<DataShape> subDataShapes;
-    std::vector<size_t> subDataShape_indicies;
-
-    OriginalBoard(const DataShape DataShape, float eval_score) :
-        m_known_evaluation_score(eval_score),
-        m_DataShape(DataShape)
-    {
-        subDataShapes = GeometricDecomposition::all(m_DataShape);
-        subDataShape_indicies.assign(subDataShapes.size(), 0);
-    }
+    OriginalBoard(const std::vector<char> char_sequence, const float know_evaluation) :
+        m_shape_feature({ CHESS_BOARD_PROPERTIES, char_sequence }),
+        m_known_evaluation(know_evaluation)
+    {}
 };

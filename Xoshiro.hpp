@@ -1,15 +1,17 @@
-class Xoshiro256ss {
+#pragma once
+
+class Xoshiro {
 public:
     using result_type = float;
 
-    Xoshiro256ss(result_type seed) {
+    Xoshiro(result_type seed) {
         s[0] = splitmix64(seed);
         s[1] = splitmix64(s[0]);
         s[2] = splitmix64(s[1]);
         s[3] = splitmix64(s[2]);
     }
 
-    result_type operator()() {
+    float operator()() {
         static constexpr result_type UINT64_T_LIMIT = static_cast<result_type>(std::numeric_limits<uint64_t>::max());
         const uint64_t result_starstar = rotl(s[1] * 5, 7) * 9;
         const uint64_t t = s[1] << 17;
@@ -43,3 +45,5 @@ private:
 
     uint64_t s[4];
 };
+
+static Xoshiro rng(12346);
