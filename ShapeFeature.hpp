@@ -19,13 +19,15 @@ public:
     ShapeFeature(const GeometricProperties shape_properties, 
         const std::vector<char> char_sequence) :
         m_shape_properties(shape_properties),
-        m_char_sequence(char_sequence)
+        m_char_sequence(char_sequence),
+        m_weight(0.f)
     {}
 
     ShapeFeature(const std::string& as_string) :
         m_shape_properties(as_string),
         m_char_sequence(Utility::stringToCharVector(
-            GeometricProperties::TrailingCharSequence(as_string)))
+            GeometricProperties::TrailingCharSequence(as_string))),
+        m_weight(0.f)
     {}
 
     const auto height() const {
@@ -50,6 +52,14 @@ public:
 
     const auto shapeType() const {
         return m_shape_properties.m_type;
+    }
+
+    const auto weight() const {
+        return m_weight;
+    }
+
+    void weight(const float weight) {
+        m_weight = weight;
     }
 
     const std::vector<std::vector<char>> charSequenceTo2D() const {
@@ -112,5 +122,40 @@ public:
         serialized += charVectorToString(m_char_sequence);
 
         return serialized;
+    }
+
+    // Todo : Refactor this, it's fucking trash
+    std::vector<ShapeFeature> decomposeIntoSubquadrillaterals() const {
+        std::vector<ShapeFeature> shape_feature_list;
+        for (size_t w = width(); w >= 1; --w) {
+            for (size_t h = height(); h >= 1; --h) {
+                for (size_t y1 = 0; y1 <= height() - h; ++y1) {
+                    for (size_t x1 = 0; x1 <= width() - w; ++x1) {
+                        auto subrect_data = std::vector<char>(w * h);
+                        for (size_t x2 = x1; x2 < x1 + w; ++x2) {
+                            for (size_t y2 = y1; y2 < y1 + h; ++y2) {
+                                subrect_data.emplace_back(charSequence()
+                                    [x2 * height() + y2]);
+                            }
+                        }
+
+                        if (!Utility::isAllThisChar(subrect_data, ' ')) {
+                            shape_feature_list.push_back(
+                                ShapeFeature(
+                                    GeometricProperties (
+                                        GeometricProperties::ShapeType::RECTANGLE,
+                                        Dimensions{ w, h },
+                                        Offsets{ x1, y1 }
+                                    ),
+                                    subrect_data
+                                ));
+                        }
+                    }
+                }
+            }
+        }
+
+        shape_feature_list.erase(shape_feature_list.begin()); // Exclude self
+        return shape_feature_list;
     }
 };
