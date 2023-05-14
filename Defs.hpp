@@ -62,13 +62,3 @@ namespace Chess {
         };
     }
 };
-
-namespace EvaluationModel {
-    static constexpr size_t ERROR_MAX = std::numeric_limits<size_t>::max();
-    static constexpr float WEIGHT_DEFAULT = 0.f;
-    static constexpr float EVALUATION_MIN = -500.f;
-    static constexpr float EVALUATION_MAX = 500.f;
-    static constexpr float FREQUENCY_DEFAULT = 0.0107f;
-    static constexpr float MAGNITUDE_DEFAULT = 0.5f;
-    static constexpr size_t ROUNDS_DEFAULT = 100000;
-};
