@@ -16,6 +16,7 @@ private:
     size_t m_current_line_count;
     size_t m_cutoff_line_count;
 
+public:
     // Below Methods Are Getters -----
     const bool readingCutoff() const {
         return m_current_line_count >= m_cutoff_line_count;

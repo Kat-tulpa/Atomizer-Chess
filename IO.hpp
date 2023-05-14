@@ -20,7 +20,6 @@ namespace Chess {
         }
 
         namespace Print {
-
             static void modelError(const float model_error) {
                 std::cout << "Model Error: " << model_error << std::endl;
             }

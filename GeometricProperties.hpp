@@ -1,7 +1,7 @@
 #pragma once
 #include <stdexcept>
 
-static const enum SERIALIZED_FORMAT {
+const enum SERIALIZED_FORMAT {
     TYPE_POS,
     WIDTH_POS,
     HEIGHT_POS,
@@ -43,7 +43,7 @@ const struct Offsets {
 const class GeometricProperties {
 public:
 
-    static const enum ShapeType : size_t {
+    const enum ShapeType : size_t {
         RECTANGLE,
         TYPE_COUNT
     };

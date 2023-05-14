@@ -55,15 +55,15 @@ namespace Utility {
         return ((n + 7) / 8) * 8;
     }
 
-    static size_t charToDigit(const char& c) {
+    static size_t charToDigit(const char c) {
         if (c < '0' || c > '9')
             throw std::invalid_argument("Character was not a digit in range [0, 9]");
-        return c - '0';
+        return static_cast<size_t>(c - '0');
     }
 
     static char toChar(const size_t d) {
         if (d < 0 || d > 9)
             throw std::invalid_argument("Digit was not in range [0, 9]");
-        return d + '0';
+        return static_cast<char>(d + '0');
     }
 };
