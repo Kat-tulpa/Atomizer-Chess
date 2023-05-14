@@ -1,22 +1,19 @@
 #pragma once
 #include <vector>
 #include <string>
-
 #include "CSV.hpp"
 #include "FEN.hpp"
 #include "EvaluationModel.hpp"
-#include "OriginalBoard.hpp"
 
 namespace ChessManager {
-    using namespace Chess::IO;
+    using namespace Chess;
     static void init() {
-        CSV csv_manager(CSV_POSITION_EVALUATION_FILE_NAME, ORIGINAL
-        );
+        CSV csv_manager(IO::CSV_POSITION_EVALUATION_FILE_NAME, 
+            ORIGINAL_BOARD_SAMPLE_SIZE);
         EvaluationModel model;
         size_t lines_processed = 0;
 
-        const size_t csv_line_count = csv_manager.getLineCount();
-        model.m_original_boards.reserve(csv_line_count);
+        const size_t csv_line_count = csv_manager.readingCutoff();
 
         while (!csv_manager.eof()) {
             const std::vector<std::string>& delimitedLine 
@@ -31,8 +28,10 @@ namespace ChessManager {
             const std::vector<char>& char_sequence 
                 = FEN::positionStringToCharSequence(FEN_string);
 
-            const OriginalBoard& board{ char_sequence, known_evaluation_score };
-            model.m_original_boards.emplace_back(board);
+            ShapeFeature board(
+                BoardProperties::CHESS_BOARD_PROPERTIES, char_sequence);
+            board.weight(known_evaluation_score);
+            model.addParentShapeFeature(board);
 
             lines_processed++;
             if (lines_processed % csv_line_count == 0) 
