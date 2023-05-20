@@ -1,5 +1,4 @@
 #pragma once
-
 #include <string>
 #include <stdexcept>
 
@@ -8,16 +7,15 @@ private:
     struct Node {
         bool is_end;
         size_t value;
-        Node* child[22];  // 13 for the characters you need
+        Node* child[13];  // Reduced to 13 for the characters you need
         Node() : is_end(false), value(0) {
-            for (int i = 0; i < 22; i++) {
+            for (int i = 0; i < 13; i++) {
                 child[i] = nullptr;
             }
         }
         ~Node() {
-            for (int i = 0; i < 22; i++) {
-                delete child[i];
-            }
+            for (auto& c : child)
+                delete c;
         }
     };
 
@@ -69,15 +67,6 @@ private:
         case 'B': return 10;
         case 'b': return 11;
         case ' ': return 12;
-        case '1': return 13;
-        case '2': return 14;
-        case '3': return 15;
-        case '4': return 16;
-        case '5': return 17;
-        case '6': return 18;
-        case '7': return 19;
-        case '8': return 20;
-        case '0': return 21;
 
         default: throw std::out_of_range("Invalid character");
         }

@@ -49,14 +49,14 @@ public:
     }
 
     // Parses a signed integer from a std::string that includes "+, -, and #" chess notation to indicate engine evaluation score
-    static int parseEvalScore(std::string evalscore) {
+    static float parseEvalScore(std::string evalscore) {
         if (evalscore[0] == '#') { // Checkmate in X moves
 
             if (evalscore[1] == '+') {
-                return 9999 - std::stoi(evalscore.substr(2));
+                return 9999.f;
             }
             else if (evalscore[1] == '-') {
-                return -9999 + std::stoi(evalscore.substr(2));
+                return -9999.f;
             }
             else {
                 throw std::invalid_argument("Invalid evalscore format");

@@ -10,7 +10,7 @@ const enum SERIALIZED_FORMAT {
     LENGTH
 };
 
-const struct Dimensions {
+struct Dimensions {
     Dimensions(size_t width, size_t height) :
         m_width(width),
         m_height(height)
@@ -21,11 +21,11 @@ const struct Dimensions {
         m_height(Utility::charToDigit(height))
     {}
 
-    const size_t m_width;
-    const size_t m_height;
+    size_t m_width;
+    size_t m_height;
 };
 
-const struct Offsets {
+struct Offsets {
     Offsets(size_t x, size_t y) :
         m_x(x),
         m_y(y)
@@ -36,14 +36,14 @@ const struct Offsets {
         m_y(Utility::charToDigit(y))
     {}
 
-    const size_t m_x;
-    const size_t m_y;
+    size_t m_x;
+    size_t m_y;
 };
 
-const class GeometricProperties {
+class GeometricProperties {
 public:
 
-    const enum ShapeType : size_t {
+    enum ShapeType : size_t {
         RECTANGLE,
         TYPE_COUNT
     };
@@ -66,6 +66,15 @@ public:
         m_dimensions(dimensions),
         m_offset(offset)
     {};
+
+    GeometricProperties& operator=(const GeometricProperties& other) {
+        if (this == &other) {
+            return *this;  // Self-assignment check
+        }
+        m_type = other.m_type;
+        m_dimensions = other.m_dimensions;
+        m_offset = other.m_offset;
+    }
 
     bool canFitInto(const GeometricProperties& other) const {
         return  (m_offset.m_x + m_dimensions.m_width 
@@ -94,7 +103,7 @@ public:
         return m_offset.m_y;
     }
 
-    const ShapeType m_type;
-    const Dimensions m_dimensions;
-    const Offsets m_offset;
+    ShapeType m_type;
+    Dimensions m_dimensions;
+    Offsets m_offset;
 };

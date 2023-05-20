@@ -46,4 +46,4 @@ private:
     uint64_t s[4];
 };
 
-static Xoshiro rng(12346);
+static Xoshiro rng(1234876786);

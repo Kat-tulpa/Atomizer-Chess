@@ -5,7 +5,7 @@
 #include "GeometricProperties.hpp"
 
 namespace Chess {
-    static constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 10000;
+    static constexpr size_t ORIGINAL_BOARD_SAMPLE_SIZE = 100000;
 	static constexpr size_t RANK_COUNT = 8;
 	static constexpr size_t FILE_COUNT = 8;
 
